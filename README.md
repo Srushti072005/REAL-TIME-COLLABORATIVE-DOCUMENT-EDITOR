@@ -38,3 +38,11 @@ Integration & Deployment
 Combine the chosen frontend and backend through RESTful APIs or GraphQL for data communication. Use tools like Docker for containerization and platforms like Heroku, Vercel, or AWS for deployment.
 
 This tech stack provides scalability, flexibility, and performance, making it suitable for building anything from MVPs to production-ready enterprise applications.
+
+
+
+#0UTPUT
+
+![Image](https://github.com/user-attachments/assets/186a5ff3-0a71-4e1b-af55-20e7604fe456)
+
+![Image](https://github.com/user-attachments/assets/ceeaa0ff-ac19-43ff-b6ef-8f8040494649)
