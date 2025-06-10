@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Frontend Framework Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body class="p-4">
+  <header class="bg-white rounded-lg shadow-lg p-6 mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">Mini Frontend Framework</h1>
+    <p class="text-gray-600">A lightweight component-based architecture demo</p>
+  </header>
+
+  <!-- App container where our components will render -->
+  <div id="app" class="bg-white rounded-lg shadow-lg p-6"></div>
+
+  <script>
+        // Simple component-based framework
+  class Component {
+    constructor(props = {}) {
+      this.props = props;
+      this.state = {};
+    }
+
+    setState(newState) {
+      this.state = { ...this.state, ...newState };
+      this.render();
+    }
+
+    render() {
+      return '';
+    }
+  }
+
+  // App state management (similar to Redux/Context)
+  const Store = {
+    state: {
+      todos: [
+        { id: 1, text: 'Learn about components', completed: true },
+        { id: 2, text: 'Build a mini app', completed: false },
+        { id: 3, text: 'Style with Tailwind', completed: false }
+      ],
+      theme: 'light'
+    },
+    listeners: []
+
+  getState() {
+    return this.state;
+  },
+
+  subscribe(listener) {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener);
+    };
+  },
+
+  dispatch(action) {
+    switch (action.type) {
+      case 'ADD_TODO':
+        this.state = {
+          ...this.state,
+          todos: [
+            ...this.state.todos,
+            {
+              id: Date.now(),
+              text: action.payload,
+              completed: false
+            }
+          ]
+        };
+        break;     
+      case 'TOGGLE_TODO':
+        this.state = {
+          ...this.state,
+          todos: this.state.todos.map(todo =>
+            todo.id === action.payload
+              ? { ...todo, completed: !todo.completed }
+              : todo
+          )
+        };
+        break;
+      case 'TOGGLE_THEME':
+        this.state = {
+          ...this.state,
+          theme: this.state.theme === 'light' ? 'dark' : 'light'
+        };
+        break;
+      default:
+        break;
+    }
+
+    this.listeners.forEach(listener => listener());
+  }
+};
+
+// TodoItem Component
+class TodoItem extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { todo } = this.props;
+
+    return `
+      <li class="flex items-center p-3 border-b border-gray-100 last:border-0">
+        <input type="checkbox"
+          class="mr-3 h-5 w-5 text-indigo-600 rounded"
+          ${todo.completed ? 'checked' : ''}
+          onchange="app.handleToggleTodo(${todo.id})"
+        />
+        <span class="${todo.completed ? 'line-through text-gray-400' : 'text-gray-800'}">
+          ${todo.text}
+        </span>
+      </li>
+    `;
+  }
+}
+
+// TodoList Component
+class TodoList extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { todos } = this.props;
+    return `
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-3">Todo List</h2>
+        <ul class="bg-gray-50 rounded-lg shadow">
+          ${todos.map(todo => new TodoItem({ todo }).render()).join('')}
+        </ul>
+      </div>
+    `;
+  }
+}
+
+// AddTodo Component
+class AddTodo extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { input: '' };
+  }
+
+  render() {
+    return `
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-3">Add New Todo</h2>
+        <div class="flex">
+          <input
+            type="text"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ri
+            placeholder="What needs to be done?"
+            value="${this.state.input}"
+            oninput="app.handleTodoInput(event)"
+          />
+<button
+  class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-r-lg transition"
+  onclick="app.handleAddTodo()"
+>
+  Add
+</button>
+
+// ThemeToggle Component
+class ThemeToggle extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { theme } = this.props;
+
+    return (
+      <div class="flex justify-end mb-6">
+        <button
+          class="flex items-center px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+          onclick="app.handleToggleTheme()"
+        >
+          <span class="mr-2">${theme === 'light' ? '🌞' : '🌙'}</span>
+        </button>
+      </div>
+    );
+  }
+}
+// App Component
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      todos: Store.getState().todos,
+      theme: Store.getState().theme,
+      newTodo: ''
+    };
+
+    // Subscribe to store changes
+    Store.subscribe(() => {
+      const state = Store.getState();
+      this.setState({
+        todos: state.todos,
+        theme: state.theme
+      });
+    });
+  }
+
+  handleToggleTodo(id) {
+    Store.dispatch({ type: 'TOGGLE_TODO', payload: id });
+  }
+
+  handleTodoInput(event) {
+    this.setState({ newTodo: event.target.value });
+  }
+}
+handleAddTodo() {
+  if (this.state.newTodo.trim()) {
+    Store.dispatch({ type: 'ADD_TODO', payload: this.state.newTodo });
+    this.setState({ newTodo: '' });
+  }
+}
+
+handleToggleTheme() {
+  Store.dispatch({ type: 'TOGGLE_THEME' });
+}
+
+render() {
+  const appClass = this.state.theme === 'dark'
+    ? 'bg-gray-800 text-white'
+    : 'bg-white text-gray-800';
+
+  document.getElementById('app').className = rounded-lg shadow-lg p-6 ${appClass};
+
+  return (
+    ${new ThemeToggle({ theme: this.state.theme }).render()}
+    ${new AddTodo().render()}
+    ${new TodoList({ todos: this.state.todos }).render()}
+
+    <div class="mt-8 p-4 bg-indigo-100 rounded-lg">
+      <h3 class="text-lg font-semibold text-indigo-800 mb-2">Framework Features Demo</h3>
+      <ul class="list-disc pl-5 text-indigo-700">
+        <li>Component-based architecture</li>
+        <li>State management (similar to Redux)</li>
+        <li>Props passing between components</li>
+      </ul>
+    </div>
+  );
+}
+// Initialize the app
+const app = new App();
+
+function renderApp() {
+  document.getElementById('app').innerHTML = app.render();
+}
+
+// Initial render
+renderApp();
+</script>
+</body>
+</html>
